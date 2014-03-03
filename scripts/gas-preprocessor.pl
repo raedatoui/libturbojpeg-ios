@@ -1,9 +1,11 @@
 #!/usr/bin/env perl
 # by David Conrad
+# modifications by D. R. Commander, Copyright (C)2013
 # This code is licensed under GPLv2 or later; go to gnu.org to read it
 #  (not that it much matters for an asm preprocessor)
 # usage: set your assembler to be something like "perl gas-preprocessor.pl gcc"
 use strict;
+use File::Temp qw(tempfile);
 
 # Apple's gas is ancient and doesn't support modern preprocessing features like
 # .rept and has ugly macro syntax, among other things. Thus, this script
@@ -45,7 +47,6 @@ if ((grep /^-c$/, @gcc_cmd) && !(grep /^-o/, @gcc_cmd)) {
         }
     }
 }
-@gcc_cmd = map { /\.[csS]$/ ? qw(-x assembler -) : $_ } @gcc_cmd;
 @preprocess_c_cmd = map { /\.o$/ ? "-" : $_ } @preprocess_c_cmd;
 
 my $comm;
@@ -367,8 +368,14 @@ sub expand_macros {
 }
 
 close(ASMFILE) or exit 1;
-open(ASMFILE, "|-", @gcc_cmd) or die "Error running assembler";
-#open(ASMFILE, ">/tmp/a.S") or die "Error running assembler";
+my $fh, my $filename;
+if ($ENV{GASPP_DEBUG}) {
+    open(ASMFILE, ">&STDOUT");
+} else {
+    ($fh, $filename) = tempfile("gas-preprocessor-tmp-XXXXXX", SUFFIX => '.S',
+                                TMPDIR => 1, UNLINK => 1);
+    open(ASMFILE, ">" . $filename) or die "Error running assembler";
+}
 
 my @sections;
 my $num_repts;
@@ -433,8 +440,12 @@ foreach my $line (@pass1_lines) {
         $thumb_labels{$1}++;
     }
 
-    if ($line =~ /^\s*((\w+:)?blx?|\.globl)\s+(\w+)/) {
-        $call_targets{$3}++;
+    if ($line =~ /^\s*((\w+\s*:\s*)?bl?x?(?:..)?(?:\.w)?|\.globl)\s+(\w+)/) {
+        if (exists $thumb_labels{$3}) {
+            print ASMFILE ".thumb_func $3\n";
+        } else {
+            $call_targets{$3}++;
+        }
     }
 
     # @l -> lo16()  @ha -> ha16()
@@ -516,11 +527,19 @@ foreach my $line (@pass1_lines) {
 print ASMFILE ".text\n";
 print ASMFILE ".align 2\n";
 foreach my $literal (keys %literal_labels) {
-    print ASMFILE "$literal_labels{$literal}:\n .word $literal\n";
+    my $label = $literal_labels{$literal};
+    print ASMFILE ".set Lval_$label, $literal\n";
+    print ASMFILE "$label: .word Lval_$label\n";
 }
 
 map print(ASMFILE ".thumb_func $_\n"),
     grep exists $thumb_labels{$_}, keys %call_targets;
 
 close(ASMFILE) or exit 1;
+
+@gcc_cmd = map { /\.[csS]$/ ? $filename : $_ } @gcc_cmd;
+@gcc_cmd = map { /\-M[DFPT]|\.lo|\.Tpo$/ ? "" : $_ } @gcc_cmd;
+system @gcc_cmd;
+$? == 0 or die "Error running assembler";
+
 #exit 1
