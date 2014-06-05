@@ -516,7 +516,7 @@
 		427BF5DF1645B6F400BC3809 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "Johannes Schriewer";
 			};
 			buildConfigurationList = 427BF5E21645B6F400BC3809 /* Build configuration list for PBXProject "libjpeg-turbo-ios" */;
@@ -654,6 +654,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					armv7,
+					armv7s,
+				);
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -672,7 +676,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -681,6 +685,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					armv7,
+					armv7s,
+				);
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -700,10 +708,6 @@
 		427BF6481645BD8C00BC3809 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7,
-					armv7s,
-				);
 				DSTROOT = /tmp/libjpeg.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
@@ -716,10 +720,6 @@
 		427BF6491645BD8C00BC3809 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7,
-					armv7s,
-				);
 				DSTROOT = /tmp/libjpeg.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
@@ -732,10 +732,6 @@
 		427BF68B1645BF1200BC3809 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7,
-					armv7s,
-				);
 				DSTROOT = /tmp/libturbojpeg.dst;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/libturbojpeg\"",
@@ -750,10 +746,6 @@
 		427BF68C1645BF1200BC3809 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7,
-					armv7s,
-				);
 				DSTROOT = /tmp/libturbojpeg.dst;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/libturbojpeg\"",
@@ -768,10 +760,6 @@
 		427BF6BB1645C08600BC3809 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7,
-					armv7s,
-				);
 				DSTROOT = /tmp/simd_arm.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_VERSION = "";
@@ -790,10 +778,6 @@
 		427BF6BC1645C08600BC3809 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv7,
-					armv7s,
-				);
 				DSTROOT = /tmp/simd_arm.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_VERSION = "";

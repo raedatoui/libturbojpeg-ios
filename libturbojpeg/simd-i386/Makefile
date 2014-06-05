@@ -27,13 +27,13 @@ prepare:
 	mkdir -p "$(BUILD_DIR)"
 	
 jsimd_i386: $(libsimd_objects)
-	xcrun llvm-gcc -m32 -march=i386 -I".." -I"../.." -I"../../libjpeg" -c "jsimd_i386.c" -o "$(BUILD_DIR)/jsimd_i386.o"
+	llvm-gcc -m32 -march=i386 -I".." -I"../.." -I"../../libjpeg" -c "jsimd_i386.c" -o "$(BUILD_DIR)/jsimd_i386.o"
 	
 build/jsimdcfg.inc: jsimdcfg.inc.h ../jpeglib.h ../jconfig.h ../jmorecfg.h
 	xcrun cpp -I"../../libjpeg" $< | egrep "^[\;%]|^\ %" | sed 's%_cpp_protection_%%' | sed 's@% define@%define@g' >"$@"
 
 %.o: %.asm 
-	/usr/local/bin/nasm -fmacho -DMACHO -DPIC -I. -I"$(BUILD_DIR)/" -o "$(BUILD_DIR)/$@" "$<"	
+	/opt/local/bin/nasm -fmacho -DMACHO -DPIC -I. -I"$(BUILD_DIR)/" -o "$(BUILD_DIR)/$@" "$<"	
 	
 jccolmmx.o: jcclrmmx.asm
 jccolss2.o: jcclrss2.asm
