@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		14E7D9D319853DCB008A12C9 /* jaricom.c in Sources */ = {isa = PBXBuildFile; fileRef = 14E7D9D219853DCB008A12C9 /* jaricom.c */; };
+		14E7D9D519853DD4008A12C9 /* jcarith.c in Sources */ = {isa = PBXBuildFile; fileRef = 14E7D9D419853DD4008A12C9 /* jcarith.c */; };
+		14E7D9D719853DE1008A12C9 /* jdarith.c in Sources */ = {isa = PBXBuildFile; fileRef = 14E7D9D619853DE1008A12C9 /* jdarith.c */; };
 		423730081646F7F90022C8FB /* jaricom.c in Sources */ = {isa = PBXBuildFile; fileRef = 423730051646F7F90022C8FB /* jaricom.c */; };
 		423730091646F7F90022C8FB /* jcarith.c in Sources */ = {isa = PBXBuildFile; fileRef = 423730061646F7F90022C8FB /* jcarith.c */; };
 		4237300A1646F7F90022C8FB /* jdarith.c in Sources */ = {isa = PBXBuildFile; fileRef = 423730071646F7F90022C8FB /* jdarith.c */; };
@@ -98,6 +101,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		14E7D9D219853DCB008A12C9 /* jaricom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jaricom.c; path = libjpeg/jaricom.c; sourceTree = "<group>"; };
+		14E7D9D419853DD4008A12C9 /* jcarith.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jcarith.c; path = libjpeg/jcarith.c; sourceTree = "<group>"; };
+		14E7D9D619853DE1008A12C9 /* jdarith.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jdarith.c; path = libjpeg/jdarith.c; sourceTree = "<group>"; };
 		423730051646F7F90022C8FB /* jaricom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jaricom.c; path = libjpeg/arithmetric_coding/jaricom.c; sourceTree = "<group>"; };
 		423730061646F7F90022C8FB /* jcarith.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jcarith.c; path = libjpeg/arithmetric_coding/jcarith.c; sourceTree = "<group>"; };
 		423730071646F7F90022C8FB /* jdarith.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jdarith.c; path = libjpeg/arithmetric_coding/jdarith.c; sourceTree = "<group>"; };
@@ -273,6 +279,9 @@
 		427BF5F91645BD0000BC3809 /* libjpeg */ = {
 			isa = PBXGroup;
 			children = (
+				14E7D9D619853DE1008A12C9 /* jdarith.c */,
+				14E7D9D419853DD4008A12C9 /* jcarith.c */,
+				14E7D9D219853DCB008A12C9 /* jaricom.c */,
 				423730031646F7EC0022C8FB /* arithmetric_coding */,
 				427BF6371645BD3C00BC3809 /* header */,
 				427BF5FC1645BD3700BC3809 /* jcapimin.c */,
@@ -575,10 +584,12 @@
 				427BF6541645BDA500BC3809 /* jcomapi.c in Sources */,
 				427BF6551645BDA500BC3809 /* jcparam.c in Sources */,
 				427BF6561645BDA500BC3809 /* jcphuff.c in Sources */,
+				14E7D9D319853DCB008A12C9 /* jaricom.c in Sources */,
 				427BF6571645BDA500BC3809 /* jcprepct.c in Sources */,
 				427BF6581645BDA500BC3809 /* jcsample.c in Sources */,
 				427BF6591645BDA500BC3809 /* jctrans.c in Sources */,
 				427BF65A1645BDA500BC3809 /* jdapimin.c in Sources */,
+				14E7D9D519853DD4008A12C9 /* jcarith.c in Sources */,
 				427BF65B1645BDA500BC3809 /* jdapistd.c in Sources */,
 				427BF65C1645BDA500BC3809 /* jdatadst.c in Sources */,
 				427BF65D1645BDA500BC3809 /* jdatasrc.c in Sources */,
@@ -592,6 +603,7 @@
 				427BF6651645BDA500BC3809 /* jdmaster.c in Sources */,
 				427BF6661645BDA500BC3809 /* jdmerge.c in Sources */,
 				427BF6671645BDA500BC3809 /* jdphuff.c in Sources */,
+				14E7D9D719853DE1008A12C9 /* jdarith.c in Sources */,
 				427BF6681645BDA500BC3809 /* jdpostct.c in Sources */,
 				427BF6691645BDA500BC3809 /* jdsample.c in Sources */,
 				427BF66A1645BDA500BC3809 /* jdtrans.c in Sources */,
