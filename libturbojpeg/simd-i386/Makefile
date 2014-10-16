@@ -1,17 +1,17 @@
 .DEFAULT_GOAL: libsimd
 
 libsimd_objects = jsimdcpu.o \
-	jccolmmx.o jdcolmmx.o jcgrammx.o \
-	jcsammmx.o jdsammmx.o jdmermmx.o \
-	jcqntmmx.o jfmmxfst.o jfmmxint.o \
-	jimmxred.o jimmxint.o jimmxfst.o \
-	jcqnt3dn.o jf3dnflt.o ji3dnflt.o \
-	jcqntsse.o jfsseflt.o jisseflt.o \
-	jccolss2.o jdcolss2.o jcgrass2.o \
-	jcsamss2.o jdsamss2.o jdmerss2.o \
-	jcqnts2i.o jfss2fst.o jfss2int.o \
-	jiss2red.o jiss2int.o jiss2fst.o \
-	jcqnts2f.o jiss2flt.o
+	jfdctflt-3dn.o   jidctflt-3dn.o   jquant-3dn.o \
+	jccolor-mmx.o    jcgray-mmx.o     jcsample-mmx.o \
+	jdcolor-mmx.o    jdmerge-mmx.o    jdsample-mmx.o \
+	jfdctfst-mmx.o   jfdctint-mmx.o   jidctfst-mmx.o \
+	jidctint-mmx.o   jidctred-mmx.o   jquant-mmx.o \
+	jfdctflt-sse.o   jidctflt-sse.o   jquant-sse.o \
+	jccolor-sse2.o   jcgray-sse2.o    jcsample-sse2.o \
+	jdcolor-sse2.o   jdmerge-sse2.o   jdsample-sse2.o \
+	jfdctfst-sse2.o  jfdctint-sse2.o  jidctflt-sse2.o \
+	jidctfst-sse2.o  jidctint-sse2.o  jidctred-sse2.o  \
+	jquantf-sse2.o   jquanti-sse2.o
 
 BUILD_DIR=build
 
@@ -34,3 +34,12 @@ build/jsimdcfg.inc: jsimdcfg.inc.h ../jpeglib.h ../../libjpeg/jconfig.h ../../li
 
 %.o: %.asm 
 	/usr/bin/nasm -f macho -DMACHO -DPIC -I. -I"$(BUILD_DIR)/" -o "$(BUILD_DIR)/$@" "$<"	
+	
+jccolor-mmx.o:   jccolext-mmx.asm
+jcgray.-mmx.o:   jcgryext-mmx.asm
+jdcolor-mmx.o:   jdcolext-mmx.asm
+jdmerge-mmx.o:   jdmrgext-mmx.asm
+jccolor-sse2.o:  jccolext-sse2.asm
+jcgray-sse2.o:   jcgryext-sse2.asm
+jdcolor-sse2.o:  jdcolext-sse2.asm
+jdmerge-sse2.o:  jdmrgext-sse2.asm
