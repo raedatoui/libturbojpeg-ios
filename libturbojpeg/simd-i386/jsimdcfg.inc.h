@@ -10,10 +10,11 @@
 
 #define JPEG_INTERNALS
 
-#include "jpeglib.h"
-#include "jconfig.h"
-#include "jmorecfg.h"
-#include "jsimd.h"
+
+#include "../../libjpeg/jconfig.h"
+#include "../../libjpeg/jmorecfg.h"
+#include "../../libjpeg/jpeglib.h"
+#include "../jsimd.h"
 
 ;
 ; -- jpeglib.h
@@ -128,3 +129,6 @@
 %define _cpp_protection_JSIMD_3DNOW JSIMD_3DNOW
 %define _cpp_protection_JSIMD_SSE JSIMD_SSE
 %define _cpp_protection_JSIMD_SSE2 JSIMD_SSE2
+
+
+

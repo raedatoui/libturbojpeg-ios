@@ -14,12 +14,12 @@
  */
 
 #define JPEG_INTERNALS
-#include "../jinclude.h"
-#include "../jpeglib.h"
+#include "../../libjpeg/jinclude.h"
+#include "../../libjpeg/jpeglib.h"
+#include "../../libjpeg/jdct.h"
 #include "../jsimd.h"
-#include "../jdct.h"
 #include "../jsimddct.h"
-#include "jsimd.h"
+
 
 #include <stdio.h>
 #include <string.h>
