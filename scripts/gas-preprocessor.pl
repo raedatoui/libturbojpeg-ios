@@ -1,11 +1,9 @@
 #!/usr/bin/env perl
 # by David Conrad
-# modifications by D. R. Commander, Copyright (C)2013
 # This code is licensed under GPLv2 or later; go to gnu.org to read it
 #  (not that it much matters for an asm preprocessor)
 # usage: set your assembler to be something like "perl gas-preprocessor.pl gcc"
 use strict;
-use File::Temp qw(tempfile);
 
 # Apple's gas is ancient and doesn't support modern preprocessing features like
 # .rept and has ugly macro syntax, among other things. Thus, this script
@@ -47,6 +45,7 @@ if ((grep /^-c$/, @gcc_cmd) && !(grep /^-o/, @gcc_cmd)) {
         }
     }
 }
+@gcc_cmd = map { /\.[csS]$/ ? qw(-x assembler -) : $_ } @gcc_cmd;
 @preprocess_c_cmd = map { /\.o$/ ? "-" : $_ } @preprocess_c_cmd;
 
 my $comm;
@@ -113,7 +112,7 @@ my %symbols;
 while (<ASMFILE>) {
     # remove all comments (to avoid interfering with evaluating directives)
     s/(?<!\\)$comm.*//x;
-
+    
     # comment out unsupported directives
     s/\.type/$comm.type/x;
     s/\.func/$comm.func/x;
@@ -123,19 +122,19 @@ while (<ASMFILE>) {
     s/\.fpu/$comm.fpu/x;
     s/\.arch/$comm.arch/x;
     s/\.object_arch/$comm.object_arch/x;
-
+    
     # the syntax for these is a little different
     s/\.global/.globl/x;
     # also catch .section .rodata since the equivalent to .const_data is .section __DATA,__const
     s/(.*)\.rodata/.const_data/x;
     s/\.int/.long/x;
     s/\.float/.single/x;
-
+    
     # catch unknown section names that aren't mach-o style (with a comma)
     if (/.section ([^,]*)$/) {
         die ".section $1 unsupported; figure out the mach-o section name and add it";
     }
-
+    
     parse_line($_);
 }
 
@@ -153,7 +152,7 @@ sub handle_if {
         my $result = $1 eq "n";
         my $type   = $2;
         my $expr   = $3;
-
+        
         if ($type eq "b") {
             $expr =~ s/\s//g;
             $result ^= $expr eq "";
@@ -170,7 +169,7 @@ sub handle_if {
         } elsif ($type eq "lt") {
             $result = eval_expr($expr) < 0;
         } else {
-	    chomp($line);
+            chomp($line);
             die "unhandled .if varient. \"$line\"";
         }
         push (@ifstack, $result);
@@ -182,7 +181,7 @@ sub handle_if {
 
 sub parse_line {
     my $line = @_[0];
-
+    
     # evaluate .if blocks
     if (scalar(@ifstack)) {
         if (/\.endif/) {
@@ -201,7 +200,7 @@ sub parse_line {
         } elsif (handle_if($line)) {
             return;
         }
-
+        
         # discard lines in false .if blocks
         foreach my $i (0 .. $#ifstack) {
             if ($ifstack[$i] <= 0) {
@@ -209,7 +208,7 @@ sub parse_line {
             }
         }
     }
-
+    
     if (/\.macro/) {
         $macro_level++;
         if ($macro_level > 1 && !$current_macro) {
@@ -224,7 +223,7 @@ sub parse_line {
             return;
         }
     }
-
+    
     if ($macro_level > 1) {
         push(@{$macro_lines{$current_macro}}, $line);
     } elsif ($macro_level == 0) {
@@ -232,11 +231,11 @@ sub parse_line {
     } else {
         if ($line =~ /\.macro\s+([\d\w\.]+)\s*(.*)/) {
             $current_macro = $1;
-
+            
             # commas in the argument list are optional, so only use whitespace as the separator
             my $arglist = $2;
             $arglist =~ s/,/ /g;
-
+            
             my @args = split(/\s+/, $arglist);
             foreach my $i (0 .. $#args) {
                 my @argpair = split(/=/, $args[$i]);
@@ -246,7 +245,7 @@ sub parse_line {
             }
             # ensure %macro_lines has the macro name added as a key
             $macro_lines{$current_macro} = [];
-
+            
         } elsif ($current_macro) {
             push(@{$macro_lines{$current_macro}}, $line);
         } else {
@@ -257,58 +256,58 @@ sub parse_line {
 
 sub expand_macros {
     my $line = @_[0];
-
+    
     # handle .if directives; apple's assembler doesn't support important non-basic ones
     # evaluating them is also needed to handle recursive macros
     if (handle_if($line)) {
         return;
     }
-
+    
     if (/\.purgem\s+([\d\w\.]+)/) {
         delete $macro_lines{$1};
         delete $macro_args{$1};
         delete $macro_args_default{$1};
         return;
     }
-
+    
     if ($line =~ /\.altmacro/) {
         $altmacro = 1;
         return;
     }
-
+    
     if ($line =~ /\.noaltmacro/) {
         $altmacro = 0;
         return;
     }
-
+    
     $line =~ s/\%([^,]*)/eval_expr($1)/eg if $altmacro;
-
+    
     if ($line =~ /\.set\s+(.*),\s*(.*)/) {
         $symbols{$1} = eval_expr($2);
     }
-
+    
     if ($line =~ /(\S+:|)\s*([\w\d\.]+)\s*(.*)/ && exists $macro_lines{$2}) {
         push(@pass1_lines, $1);
         my $macro = $2;
-
+        
         # commas are optional here too, but are syntactically important because
         # parameters can be blank
         my @arglist = split(/,/, $3);
         my @args;
         my @args_seperator;
-
+        
         my $comma_sep_required = 0;
         foreach (@arglist) {
             # allow arithmetic/shift operators in macro arguments
             $_ =~ s/\s*(\+|-|\*|\/|<<|>>)\s*/$1/g;
-
+            
             my @whitespace_split = split(/\s+/, $_);
             if (!@whitespace_split) {
                 push(@args, '');
                 push(@args_seperator, '');
             } else {
                 foreach (@whitespace_split) {
-                        #print ("arglist = \"$_\"\n");
+                    #print ("arglist = \"$_\"\n");
                     if (length($_)) {
                         push(@args, $_);
                         my $sep = $comma_sep_required ? "," : " ";
@@ -318,15 +317,15 @@ sub expand_macros {
                     }
                 }
             }
-
+            
             $comma_sep_required = 1;
         }
-
+        
         my %replacements;
         if ($macro_args_default{$macro}){
             %replacements = %{$macro_args_default{$macro}};
         }
-
+        
         # construct hashtable of text to replace
         foreach my $i (0 .. $#args) {
             my $argname = $macro_args{$macro}[$i];
@@ -353,9 +352,9 @@ sub expand_macros {
                 $replacements{$argname} = $args[$i];
             }
         }
-
+        
         my $count = $macro_count++;
-
+        
         # apply replacements as regex
         foreach (@{$macro_lines{$macro}}) {
             my $macro_line = $_;
@@ -374,13 +373,10 @@ sub expand_macros {
 }
 
 close(ASMFILE) or exit 1;
-my $fh, my $filename;
 if ($ENV{GASPP_DEBUG}) {
     open(ASMFILE, ">&STDOUT");
 } else {
-    ($fh, $filename) = tempfile("gas-preprocessor-tmp-XXXXXX", SUFFIX => '.S',
-                                TMPDIR => 1, UNLINK => 1);
-    open(ASMFILE, ">" . $filename) or die "Error running assembler";
+    open(ASMFILE, "|-", @gcc_cmd) or die "Error running assembler";
 }
 
 my @sections;
@@ -413,10 +409,10 @@ foreach my $line (@pass1_lines) {
         $line = $sections[-2];
         push(@sections, $line);
     }
-
+    
     $thumb = 1 if $line =~ /\.code\s+16|\.thumb/;
     $thumb = 0 if $line =~ /\.code\s+32|\.arm/;
-
+    
     # handle ldr <reg>, =<expr>
     if ($line =~ /(.*)\s*ldr([\w\s\d]+)\s*,\s*=(.*)/) {
         my $label = $literal_labels{$3};
@@ -433,101 +429,101 @@ foreach my $line (@pass1_lines) {
         }
         %literal_labels = ();
     }
-
+    
     # thumb add with large immediate needs explicit add.w
     if ($thumb and $line =~ /add\s+.*#([^@]+)/) {
         $line =~ s/add/add.w/ if eval_expr($1) > 255;
-    }
+}
 
-    # mach-o local symbol names start with L (no dot)
-    $line =~ s/(?<!\w)\.(L\w+)/$1/g;
+# mach-o local symbol names start with L (no dot)
+$line =~ s/(?<!\w)\.(L\w+)/$1/g;
 
-    if ($thumb and $line =~ /^\s*(\w+)\s*:/) {
-        $thumb_labels{$1}++;
-    }
+if ($thumb and $line =~ /^\s*(\w+)\s*:/) {
+    $thumb_labels{$1}++;
+}
 
-    if ($line =~ /^\s*((\w+\s*:\s*)?bl?x?(?:..)?(?:\.w)?|\.globl)\s+(\w+)/) {
-        if (exists $thumb_labels{$3}) {
-            print ASMFILE ".thumb_func $3\n";
-        } else {
-            $call_targets{$3}++;
-        }
-    }
-
-    # @l -> lo16()  @ha -> ha16()
-    $line =~ s/,\s+([^,]+)\@l\b/, lo16($1)/g;
-    $line =~ s/,\s+([^,]+)\@ha\b/, ha16($1)/g;
-
-    # move to/from SPR
-    if ($line =~ /(\s+)(m[ft])([a-z]+)\s+(\w+)/ and exists $ppc_spr{$3}) {
-        if ($2 eq 'mt') {
-            $line = "$1${2}spr $ppc_spr{$3}, $4\n";
-        } else {
-            $line = "$1${2}spr $4, $ppc_spr{$3}\n";
-        }
-    }
-
-    # old gas versions store upper and lower case names on .req,
-    # but they remove only one on .unreq
-    if ($fix_unreq) {
-        if ($line =~ /\.unreq\s+(.*)/) {
-            $line = ".unreq " . lc($1) . "\n";
-            print ASMFILE ".unreq " . uc($1) . "\n";
-        }
-    }
-
-    if ($line =~ /\.rept\s+(.*)/) {
-        $num_repts = $1;
-        $rept_lines = "\n";
-
-        # handle the possibility of repeating another directive on the same line
-        # .endr on the same line is not valid, I don't know if a non-directive is
-        if ($num_repts =~ s/(\.\w+.*)//) {
-            $rept_lines .= "$1\n";
-        }
-        $num_repts = eval($num_repts);
-    } elsif ($line =~ /\.irp\s+([\d\w\.]+)\s*(.*)/) {
-        $in_irp = 1;
-        $num_repts = 1;
-        $rept_lines = "\n";
-        $irp_param = $1;
-
-        # only use whitespace as the separator
-        my $irp_arglist = $2;
-        $irp_arglist =~ s/,/ /g;
-        $irp_arglist =~ s/^\s+//;
-        @irp_args = split(/\s+/, $irp_arglist);
-    } elsif ($line =~ /\.irpc\s+([\d\w\.]+)\s*(.*)/) {
-        $in_irp = 1;
-        $num_repts = 1;
-        $rept_lines = "\n";
-        $irp_param = $1;
-
-        my $irp_arglist = $2;
-        $irp_arglist =~ s/,/ /g;
-        $irp_arglist =~ s/^\s+//;
-        @irp_args = split(//, $irp_arglist);
-    } elsif ($line =~ /\.endr/) {
-        if ($in_irp != 0) {
-            foreach my $i (@irp_args) {
-                my $line = $rept_lines;
-                $line =~ s/\\$irp_param/$i/g;
-                $line =~ s/\\\(\)//g;     # remove \()
-                print ASMFILE $line;
-            }
-        } else {
-            for (1 .. $num_repts) {
-                print ASMFILE $rept_lines;
-            }
-        }
-        $rept_lines = '';
-        $in_irp = 0;
-        @irp_args = '';
-    } elsif ($rept_lines) {
-        $rept_lines .= $line;
+if ($line =~ /^\s*((\w+\s*:\s*)?bl?x?(?:..)?(?:\.w)?|\.globl)\s+(\w+)/) {
+    if (exists $thumb_labels{$3}) {
+        print ASMFILE ".thumb_func $3\n";
     } else {
-        print ASMFILE $line;
+        $call_targets{$3}++;
     }
+}
+
+# @l -> lo16()  @ha -> ha16()
+$line =~ s/,\s+([^,]+)\@l\b/, lo16($1)/g;
+$line =~ s/,\s+([^,]+)\@ha\b/, ha16($1)/g;
+
+# move to/from SPR
+if ($line =~ /(\s+)(m[ft])([a-z]+)\s+(\w+)/ and exists $ppc_spr{$3}) {
+    if ($2 eq 'mt') {
+        $line = "$1${2}spr $ppc_spr{$3}, $4\n";
+    } else {
+        $line = "$1${2}spr $4, $ppc_spr{$3}\n";
+    }
+}
+
+# old gas versions store upper and lower case names on .req,
+# but they remove only one on .unreq
+if ($fix_unreq) {
+    if ($line =~ /\.unreq\s+(.*)/) {
+        $line = ".unreq " . lc($1) . "\n";
+        print ASMFILE ".unreq " . uc($1) . "\n";
+    }
+}
+
+if ($line =~ /\.rept\s+(.*)/) {
+    $num_repts = $1;
+    $rept_lines = "\n";
+    
+    # handle the possibility of repeating another directive on the same line
+    # .endr on the same line is not valid, I don't know if a non-directive is
+    if ($num_repts =~ s/(\.\w+.*)//) {
+        $rept_lines .= "$1\n";
+    }
+    $num_repts = eval($num_repts);
+} elsif ($line =~ /\.irp\s+([\d\w\.]+)\s*(.*)/) {
+    $in_irp = 1;
+    $num_repts = 1;
+    $rept_lines = "\n";
+    $irp_param = $1;
+    
+    # only use whitespace as the separator
+    my $irp_arglist = $2;
+    $irp_arglist =~ s/,/ /g;
+    $irp_arglist =~ s/^\s+//;
+    @irp_args = split(/\s+/, $irp_arglist);
+} elsif ($line =~ /\.irpc\s+([\d\w\.]+)\s*(.*)/) {
+    $in_irp = 1;
+    $num_repts = 1;
+    $rept_lines = "\n";
+    $irp_param = $1;
+    
+    my $irp_arglist = $2;
+    $irp_arglist =~ s/,/ /g;
+    $irp_arglist =~ s/^\s+//;
+    @irp_args = split(//, $irp_arglist);
+} elsif ($line =~ /\.endr/) {
+    if ($in_irp != 0) {
+        foreach my $i (@irp_args) {
+            my $line = $rept_lines;
+            $line =~ s/\\$irp_param/$i/g;
+            $line =~ s/\\\(\)//g;     # remove \()
+            print ASMFILE $line;
+        }
+    } else {
+        for (1 .. $num_repts) {
+            print ASMFILE $rept_lines;
+        }
+    }
+    $rept_lines = '';
+    $in_irp = 0;
+    @irp_args = '';
+} elsif ($rept_lines) {
+    $rept_lines .= $line;
+} else {
+    print ASMFILE $line;
+}
 }
 
 print ASMFILE ".text\n";
@@ -539,13 +535,7 @@ foreach my $literal (keys %literal_labels) {
 }
 
 map print(ASMFILE ".thumb_func $_\n"),
-    grep exists $thumb_labels{$_}, keys %call_targets;
+grep exists $thumb_labels{$_}, keys %call_targets;
 
 close(ASMFILE) or exit 1;
-
-@gcc_cmd = map { /\.[csS]$/ ? $filename : $_ } @gcc_cmd;
-@gcc_cmd = map { /\-M[DFPT]|\.lo|\.Tpo$/ ? "" : $_ } @gcc_cmd;
-system @gcc_cmd;
-$? == 0 or die "Error running assembler";
-
 #exit 1

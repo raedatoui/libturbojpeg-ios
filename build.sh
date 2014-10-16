@@ -2,7 +2,7 @@
 
 LINES_SHOW="20"
 LINES_PATTERN="BUILD SUCCEEDED"
-IOSSDK_VER="7.1"
+IOSSDK_VER="8.0"
 SDK_OS="-sdk iphoneos${IOSSDK_VER}"
 SDK_SIM="-sdk iphonesimulator${IOSSDK_VER}"
 
