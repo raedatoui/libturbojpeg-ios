@@ -5,7 +5,7 @@
 #define JPEG_LIB_VERSION 62
 
 /* libjpeg-turbo version */
-#define LIBJPEG_TURBO_VERSION 1.2.80
+#define LIBJPEG_TURBO_VERSION 1.3.90
 
 /* Support arithmetic encoding */
 #define C_ARITH_CODING_SUPPORTED 1
@@ -25,7 +25,7 @@
 #define BITS_IN_JSAMPLE  8      /* use 8 or 12 */
 
 /* Compiler supports function prototypes. */
-#define HAVE_PROTOTYPES 1
+#define HAVE_LOCALE_H 1
 
 /* Define to 1 if you have the <stddef.h> header file. */
 #define HAVE_STDDEF_H 1
@@ -40,19 +40,21 @@
 #define HAVE_UNSIGNED_SHORT 1
 
 /* Compiler does not support pointers to unspecified structures. */
-/* #undef INCOMPLETE_TYPES_BROKEN */
+#undef INCOMPLETE_TYPES_BROKEN
 
-/* Compiler has <strings.h> rather than standard <string.h>. */
-/* #undef NEED_BSD_STRINGS */
+/* Support in-memory source/destination managers */
+#undef MEM_SRCDST_SUPPORTED
 
-/* Linker requires that global names be unique in first 15 characters. */
-/* #undef NEED_SHORT_EXTERNAL_NAMES */
+/* Define if you have BSD-like bzero and bcopy in <strings.h> rather than
+   memset/memcpy in <string.h>. */
+#undef NEED_BSD_STRINGS
 
 /* Need to include <sys/types.h> in order to obtain size_t. */
 #define NEED_SYS_TYPES_H 1
 
-/* Broken compiler shifts signed values as an unsigned shift. */
-/* #undef RIGHT_SHIFT_IS_UNSIGNED */
+/* Define if your (broken) compiler shifts signed values as if they were
+   unsigned. */
+#undef RIGHT_SHIFT_IS_UNSIGNED
 
 /* Use accelerated SIMD routines. */
 #define WITH_SIMD 1
