@@ -29,7 +29,7 @@ prepare:
 jsimd_i386: $(libsimd_objects)
 	xcrun --sdk iphonesimulator clang -c -m32 -march=i386 -I".." -I"../.." -I"../../libjpeg" -c "jsimd_i386.c" -o "$(BUILD_DIR)/jsimd_i386.o"
 	
-build/jsimdcfg.inc: jsimdcfg.inc.h ../jpeglib.h ../jconfig.h ../jmorecfg.h
+build/jsimdcfg.inc: jsimdcfg.inc.h ../jpeglib.h ../../libjpeg/jconfig.h ../../libjpeg/jmorecfg.h ../../libjpeg/jconfigint.h
 	xcrun cpp -I"../../libjpeg" $< | egrep "^[\;%]|^\ %" | sed 's%_cpp_protection_%%' | sed 's@% define@%define@g' >"$@"
 
 %.o: %.asm 

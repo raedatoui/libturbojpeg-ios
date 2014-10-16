@@ -3,7 +3,7 @@
 #define BUILD "20141016"
 
 /* How to obtain function inlining. */
-#define INLINE inline __attribute__((always_inline))
+#define INLINE __attribute__((always_inline))
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "libjpeg-turbo"
