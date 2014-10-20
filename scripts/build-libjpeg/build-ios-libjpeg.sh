@@ -5,10 +5,13 @@
 Create a full-auto to iOS for the library specified. I do also builds the architecture download, more than one. Create architecture i386, x86_64, armv7, armv7s, arm64 by default.
 
 #__REM__
-TARGET_VERSION="1.3.90"
-ARCHIVE_BASENAME="libjpeg-turbo"
-OUTPUT_LIBS="libjpeg.a libturbojpeg.a"
-DOWNLOAD_URL="http://softlayer-sng.dl.sourceforge.net/project/${ARCHIVE_BASENAME}/${TARGET_VERSION}/${ARCHIVE_BASENAME}-${TARGET_VERSION}.tar.gz"
+
+TARGET_VERSION="9a"
+ARCHIVE_BASENAME="jpeg"
+OUTPUT_LIBS="libjpeg.a"
+DOWNLOAD_URL="http://ijg.org/files/${ARCHIVE_BASENAME}sr${TARGET_VERSION}.zip"
+
+
 #check the version
 #http://sourceforge.net/projects/libjpeg-turbo/files/?source=navbar
 
@@ -54,15 +57,15 @@ cd $SRC_DIR
 
 set -e
 
-if [ ! -e "${SRC_DIR}/${ARCHIVE_BASENAME}-${TARGET_VERSION}.tar.gz" ]; then
+if [ ! -e "${SRC_DIR}/${ARCHIVE_BASENAME}sr${TARGET_VERSION}.zip" ]; then
 	cat <<_EOT_
 ##############################################################################
 ####
-####  Downloading ${ARCHIVE_BASENAME}-${TARGET_VERSION}.tar.gz
+####  Downloading ${ARCHIVE_BASENAME}sr${TARGET_VERSION}.zip
 ####
 ##############################################################################
 _EOT_
-    echo "${SRC_DIR}/${ARCHIVE_BASENAME}-${TARGET_VERSION}.tar.gz"
+    echo "${SRC_DIR}/${ARCHIVE_BASENAME}sr${TARGET_VERSION}.zip"
 	curl -O ${DOWNLOAD_URL}
 	#wget ${DOWNLOAD_URL}
 	echo "Done." ; echo ""
@@ -71,14 +74,25 @@ fi
 cat <<_EOT_
 ##############################################################################
 ####
-####  Using ${ARCHIVE_BASENAME}-${TARGET_VERSION}.tar.gz
+####  Using ${ARCHIVE_BASENAME}sr${TARGET_VERSION}.zip
 ####
 ##############################################################################
 _EOT_
-echo "${SRC_DIR}/${ARCHIVE_BASENAME}-${TARGET_VERSION}.tar.gz"
-tar zxf ${ARCHIVE_BASENAME}-${TARGET_VERSION}.tar.gz -C $SRC_DIR
+echo "${SRC_DIR}/${ARCHIVE_BASENAME}sr${TARGET_VERSION}.zip"
+unzip -o ${ARCHIVE_BASENAME}sr${TARGET_VERSION}.zip -d ${SRC_DIR}
+
 
 cd "${SRC_DIR}/${ARCHIVE_BASENAME}-${TARGET_VERSION}"
+
+cat <<_EOT_
+##############################################################################
+####
+####  Patching ${ARCHIVE_BASENAME}-${TARGET_VERSION}
+####
+##############################################################################
+_EOT_
+
+patch -p2 < ../../../jpeg_code.patch
 
 export ORIGINALPATH=$PATH
 
@@ -131,7 +145,7 @@ _EOT_
 			else
 				HOST_CFLAGS="${HOST_CFLAGS} -O0 -g -DDEBUG"
 			fi
-
+            chmod 777 configure
 			./configure \
 			    --prefix=${PREFIX} \
 			    --build x86_64-apple-darwin \
@@ -215,6 +229,7 @@ _EOT_
 	make V=${VERBOSE} clean
 	make -j4 V=${VERBOSE}
 	make -j4 V=${VERBOSE} install
+    make V=${VERBOSE} clean
 	echo "Done." ; echo ""
 done
 

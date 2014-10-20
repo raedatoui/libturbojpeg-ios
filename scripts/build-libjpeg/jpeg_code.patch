@@ -1,0 +1,12 @@
+diff -ruN ../jpeg-9a/configure.ac ../jpeg-9a-patch/configure.ac
+--- ../jpeg-9a/configure.ac	2013-01-26 20:56:32.000000000 +0800
++++ ../jpeg-9a-patch/configure.ac	2014-10-20 14:51:47.000000000 +0800
+@@ -17,7 +17,7 @@
+ AUTOHEADER="echo autoheader ignored"
+ 
+ # Check system type
+-AC_CANONICAL_TARGET
++#AC_CANONICAL_TARGET
+ 
+ # Initialize Automake
+ # Don't require all the GNU mandated files
