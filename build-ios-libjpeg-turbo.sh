@@ -5,10 +5,11 @@
 Create a full-auto to iOS for the library specified. I do also builds the architecture download, more than one. Create architecture i386, x86_64, armv7, armv7s, arm64 by default.
 
 #__REM__
-TARGET_VERSION="1.3.90"
+TARGET_VERSION="1.3.1"
 ARCHIVE_BASENAME="libjpeg-turbo"
 OUTPUT_LIBS="libjpeg.a libturbojpeg.a"
 DOWNLOAD_URL="http://softlayer-sng.dl.sourceforge.net/project/${ARCHIVE_BASENAME}/${TARGET_VERSION}/${ARCHIVE_BASENAME}-${TARGET_VERSION}.tar.gz"
+#DOWNLOAD_URL="http://jaist.dl.sourceforge.net/project/libjpeg-turbo/1.3.90%20%281.4%20beta1%29/libjpeg-turbo-1.3.90.tar.gz"
 #check the version
 #http://sourceforge.net/projects/libjpeg-turbo/files/?source=navbar
 
@@ -17,6 +18,7 @@ DEPLOYMENT_TARGET="ios"
 SDK_VERSION="8.1"
 MIN_OS_VERSION="6.0"
 ARCHS="i386 x86_64 armv7 armv7s arm64"
+SIMD_OPTION="--with-simd"
 
 #osx
 #DEPLOYMENT_TARGET="osx"
@@ -35,7 +37,7 @@ DEVELOPER=`xcode-select -print-path`
 cd "`dirname \"$0\"`"
 REPOROOT=$(pwd)
 
-OUTPUT_DIR="${REPOROOT}/dependencies-lib"
+OUTPUT_DIR="${REPOROOT}/${ARCHIVE_BASENAME}-${TARGET_VERSION}-${DEPLOYMENT_TARGET}${SDK_VERSION}(${MIN_OS_VERSION})-static-lib"
 mkdir -p "${OUTPUT_DIR}/include"
 mkdir -p "${OUTPUT_DIR}/lib"
 
@@ -139,8 +141,9 @@ _EOT_
 			    --enable-static \
 			    --disable-shared \
 			    --disable-silent-rules \
-	        --with-pic \
-	        --with-sysroot ${HOST_SYSROOT} \
+                ${SIMD_OPTION} \
+                --with-pic \
+                --with-sysroot ${HOST_SYSROOT} \
 			    CC="$HOST_CC" LD="$HOST_CC" \
 			    CFLAGS="-isysroot $HOST_SYSROOT $HOST_CFLAGS" \
 			    LDFLAGS="-isysroot $HOST_SYSROOT $HOST_LDFLAGS"
@@ -167,9 +170,10 @@ _EOT_
 			    --host x86_64-apple-darwin \
 			    --enable-static \
 			    --disable-shared \
-			    --disable-silent-rules \
-	        --with-pic \
-	        --with-sysroot ${HOST_SYSROOT} \
+                --disable-silent-rules \
+                ${SIMD_OPTION} \
+                --with-pic \
+                --with-sysroot ${HOST_SYSROOT} \
 			    CC="$HOST_CC" LD="$HOST_CC" \
 			    CFLAGS="-isysroot $HOST_SYSROOT $HOST_CFLAGS" \
 			    LDFLAGS="-isysroot $HOST_SYSROOT $HOST_LDFLAGS"
@@ -196,6 +200,7 @@ _EOT_
 	        --enable-static \
 	        --disable-shared \
 	        --disable-silent-rules \
+            ${SIMD_OPTION} \
 	        --with-pic \
 	        --with-sysroot ${HOST_SYSROOT} \
 	        CC="$HOST_CC" LD="$HOST_CC" \
@@ -218,6 +223,7 @@ _EOT_
 	echo "Done." ; echo ""
 done
 
+rm -rf "${SRC_DIR}/${ARCHIVE_BASENAME}-${TARGET_VERSION}"
 ########################################
 
 	cat <<_EOT_
@@ -242,10 +248,9 @@ for OUTPUT_LIB in ${OUTPUT_LIBS}; do
 	done
 	# Combine the three architectures into a universal library.
 	if [ -n "$INPUT_LIBS"  ]; then
-		lipo -create $INPUT_LIBS \
-		-output "${OUTPUT_DIR}/lib/${OUTPUT_LIB}"
+		lipo -create $INPUT_LIBS -output "${OUTPUT_DIR}/lib/${OUTPUT_LIB}"
 	else
-		echo "$OUTPUT_LIB does not exist, skipping (are the dependencies installed?)"
+		echo "${OUTPUT_LIB} does not exist, skipping (are the dependencies installed?)"
 	fi
 done
 
@@ -264,6 +269,8 @@ for ARCH in ${ARCHS}; do
 	echo "Done." ; echo ""
 done
 
-lipo -info "${OUTPUT_DIR}/lib/${OUTPUT_LIB}"
 
+for OUTPUT_LIB in ${OUTPUT_LIBS}; do
+    lipo -info "${OUTPUT_DIR}/lib/${OUTPUT_LIB}"
+done
 echo "Done all." ; echo ""
